@@ -1,0 +1,57 @@
+# Environment variables (NEVER commit this!)
+.env
+.env.local
+.env.*.local
+
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Flask
+instance/
+.webassets-cache
+
+# Database files (don't commit these)
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs (don't commit these)
+logs/
+*.log
+
+# Reports (don't commit these)
+reports/
+
+# Models (too large for Git)
+models/*.pkl
+models/*.h5
+models/*.pt
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
