@@ -27,6 +27,7 @@ class Admin(db.Model):
     #attributes
     __tablename__ = 'admins'
     adminID = db.Column(db.Integer, primary_key=True)
+    approvalID=db.Column(db.Integer)
     status=db.Column(db.String(100), nullable=False)
     lastLogin = db.Column(db.DateTime,nullable=False)
     privilegeControl=db.Column(db.String(300), nullable=False)
@@ -133,4 +134,68 @@ class SandboxSession(db.Model):
 
     #relationships
     predictions=db.relationship('Prediction', backref='sandboxSession', lazy=True)
+
+#prediction
+class Prediction(db.Model):
+    __tablename__ = 'predictions'
+
+    predictionID = db.Column(db.Integer, primary_key=True)
+    inferenceTime=db.Column(db.Float)
+    confidence=db.Column(db.Float, nullable=False)
+    scoreVector=db.Column(db.Text)
+    label=db.Column(db.String(100),nullable=False)
+
+    #FK
+    versionID=db.Column(db.Integer, db.ForeignKey('modelVersions.versionID'), nullable=False)
+    sessionID=db.Column(db.Integer, db.ForeignKey('sandboxSessions.sessionID'), nullable=False)
+
+    #relationships
+    reports=db.relationship('Report', backref='prediction', lazy=True)
+
+#reports
+class Report(db.Model):
+    __tablename__ = 'reports'
+
+    reportID = db.Column(db.Integer, primary_key=True)
+    generationTime=db.Column(db.DateTime,default=datetime.utcnow)
+    threatLevel=db.Column(db.String(100))
+    status=db.Column(db.String(100), default='pending')
+    summary=db.Column(db.Text)
+    format=db.Column(db.String(100))
+
+    #FK
+    predictionID=db.Column(db.Integer, db.ForeignKey('predictions.predictionID'), nullable=False)
+
+#model
+class Model(db.Model):
+    __tablename__ = 'models'
+
+    modelID = db.Column(db.Integer, primary_key=True)
+    name=db.Column(db.String(100),nullable=False)
+    modelFamily=db.Column(db.String(100))
+    framework=db.Column(db.String(100))
+
+#grantsPermission relationship with attribute
+class GrantsPermission(db.Model):
+    __tablename__ = 'grantsPermissions'
+
+    permissionID = db.Column(db.Integer, primary_key=True)
+    resource=db.Column(db.String(300))
+    action=db.Column(db.String(300))
+
+    #FK
+    adminID=db.Column(db.Integer, db.ForeignKey('admins.adminID'), nullable=False)
+    userID=db.Column(db.Integer, db.ForeignKey('users.userID'), nullable=False)
+
+#manages
+class Manages(db.Model):
+    __tablename__ = 'manages'
+
+    roleID = db.Column(db.Integer, primary_key=True)
+    roleName=db.Column(db.String(100))
+    roleDescription=db.Column(db.String(300))
+
+    #FK
+    adminID=db.Column(db.Integer, db.ForeignKey('admins.adminID'), nullable=False)
+    userID=db.Column(db.Integer, db.ForeignKey('users.userID'), nullable=False)
 
