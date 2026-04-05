@@ -72,7 +72,7 @@ class URLSubmission(db.Model):
     websites=db.relationship('Website', backref='submission', lazy=True)
 
 #explaination
-class Explanations(db.Model):
+class Explanation(db.Model):
     __tablename__ = 'explanations'
 
     explainationID = db.Column(db.Integer, primary_key=True)
@@ -150,10 +150,10 @@ class Prediction(db.Model):
     sessionID=db.Column(db.Integer, db.ForeignKey('sandboxSessions.sessionID'), nullable=False)
 
     #relationships
-    reports=db.relationship('Report', backref='prediction', lazy=True)
+    reports=db.relationship('Reports', backref='prediction', lazy=True)
 
 #reports
-class Report(db.Model):
+class Reports(db.Model):
     __tablename__ = 'reports'
 
     reportID = db.Column(db.Integer, primary_key=True)
