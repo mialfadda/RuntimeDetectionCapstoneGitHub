@@ -29,17 +29,17 @@ class Admin(db.Model):
     adminID = db.Column(db.Integer, primary_key=True)
     status=db.Column(db.String(100), nullable=False)
     lastLogin = db.Column(db.DateTime,nullable=False)
-    privelegeControl=db.Column(db.String(300), nullable=False)
+    privilegeControl=db.Column(db.String(300), nullable=False)
 
     #FK
     userID = db.Column(db.Integer, db.ForeignKey('users.userID'), nullable=False)
 
     #relationships
-    recordsActionLogs=db.relationship('ActionLog', backref='admin', lazy='True')
-    grantsPermissions=db.relationship('GrantsPermission', backref='admin', lazy='True')
-    approvesModelVersions=db.relationship('ModelVersion', backref='admin', lazy='True')
-    recordsURLSubmissions=db.relationship('URLSubmission', backref='admin', lazy='True')
-    manages=db.relationship('Manages', backref='admin', lazy='True')
+    recordsActionLogs=db.relationship('ActionLog', backref='admin', lazy=True)
+    grantsPermissions=db.relationship('GrantsPermission', backref='admin', lazy=True)
+    approvesModelVersions=db.relationship('ModelVersion', backref='approvedByAdmin', lazy=True)
+    recordsURLSubmissions=db.relationship('URLSubmission', backref='recordedByAdmin', lazy=True)
+    manages=db.relationship('Manages', backref='managedByAdmin', lazy=True)
 
 #ActionLog
 class ActionLog(db.Model):
@@ -68,11 +68,11 @@ class URLSubmission(db.Model):
     adminID = db.Column(db.Integer, db.ForeignKey('admins.adminID'))
 
     #relationships
-    websites=db.relationship('Website', backref='submission', lazy='True')
+    websites=db.relationship('Website', backref='submission', lazy=True)
 
 #explaination
-class Explainations(db.Model):
-    __tablename__ = 'explainations'
+class Explanations(db.Model):
+    __tablename__ = 'explanations'
 
     explainationID = db.Column(db.Integer, primary_key=True)
     rationale=db.Column(db.Text)
@@ -83,7 +83,7 @@ class Explainations(db.Model):
     predictionID = db.Column(db.Integer, db.ForeignKey('predictions.predictionID'), nullable=False)
 
     #Relationships
-    prediction=db.relationship('Prediction', backref='explaination', lazy='True')
+    prediction=db.relationship('Prediction', backref='explanation', lazy=True)
 
 #website
 class Website(db.Model):
@@ -97,7 +97,7 @@ class Website(db.Model):
     submissionID = db.Column(db.Integer, db.ForeignKey('urlSubmissions.submissionID'), nullable=False)
 
     #relationships
-    sandboxSessions=db.relationship('SandboxSession', backref='website', lazy='True')
+    sandboxSessions=db.relationship('SandboxSession', backref='website', lazy=True)
 
 #modelversion
 class ModelVersion(db.Model):
@@ -114,7 +114,23 @@ class ModelVersion(db.Model):
     adminID = db.Column(db.Integer, db.ForeignKey('admins.adminID'))
 
     #relationships
-    model=db.relationship('Model', backref='version', lazy='True')
-    predictions=db.relationship('Prediction', backref='version', lazy='True')
+    model=db.relationship('Model', backref='versions', lazy=True)
+    predictions=db.relationship('Prediction', backref='modelVersion', lazy=True)
 
+#sandbox Session
+class SandboxSession(db.Model):
+    __tablename__ = 'sandboxSessions'
+
+    sessionID = db.Column(db.Integer, primary_key=True)
+    isIsolated=db.Column(db.Boolean,default=True)
+    engine=db.Column(db.String(100))
+    startTime=db.Column(db.DateTime)
+    endTime=db.Column(db.DateTime)
+    status=db.Column(db.String(100), default='pending')
+
+    #FK
+    websiteID=db.Column(db.Integer, db.ForeignKey('websites.websiteID'), nullable=False)
+
+    #relationships
+    predictions=db.relationship('Prediction', backref='sandboxSession', lazy=True)
 
