@@ -1,5 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from sqlalchemy.orm import validates
+
 
 db = SQLAlchemy()
 
@@ -15,12 +17,24 @@ class User(db.Model):
     __tablename__ = 'users'
     userID = db.Column(db.Integer, primary_key=True)
     name=db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(150), nullable=False)
+    email = db.Column(db.String(150), nullable=False, unique=True)
     role=db.Column(db.String(100), default='user')
     passwordHash = db.Column(db.String(300), nullable=False)
 
     #Relationships
-    submissions = db.relationship('URLSubmission', backref='user', lazy=True)
+    submissions = db.relationship('URLSubmission', backref='user', lazy=True, cascade='all, delete-orphan')
+    #1 user submits many URLSubmissions, and if user deleted all their submissions will be deleted as well
+
+    #Validations
+    @validates('email')
+    def validate_email(self, key, email):
+        assert '@' in email, 'Invalid email address'
+        return email
+
+    @validates('role')
+    def validate_name(self, key, role):
+        assert role in ['user', 'admin'], 'Role must be user or admin'
+        return role
 
 #admin
 class Admin(db.Model):
