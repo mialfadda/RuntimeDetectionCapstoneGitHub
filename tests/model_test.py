@@ -118,18 +118,18 @@ def test_full_chain(app):
         db.session.add(user)
         db.session.commit()
 
-        # Create submission
-        submission = URLSubmission(userID=user.userID,
-                                  url='http://evil-site.com',
-                                  status='pending')
-        db.session.add(submission)
-        db.session.commit()
-
-        # Create website
-        website = Website(submissionID=submission.submissionID,
-                         rootDomain='evil-site.com',
+        # Create website first (no submissionID needed anymore)
+        website = Website(rootDomain='evil-site.com',
                          topLevelDomain='.com')
         db.session.add(website)
+        db.session.commit()
+
+        # Create submission pointing TO the website (many to 1)
+        submission = URLSubmission(userID=user.userID,
+                                  url='http://evil-site.com',
+                                  status='pending',
+                                  websiteID=website.websiteID)
+        db.session.add(submission)
         db.session.commit()
 
         # Create sandbox session
@@ -146,7 +146,7 @@ def test_full_chain(app):
         db.session.commit()
 
         version = ModelVersion(modelID=model.modelID, versionTag='v1.0',
-                              status='active', accuracy=0.97)
+                              status='active', accuracy=97.0)
         db.session.add(version)
         db.session.commit()
 
@@ -154,14 +154,14 @@ def test_full_chain(app):
         prediction = Prediction(sessionID=session.sessionID,
                                versionID=version.versionID,
                                label='phishing',
-                               confidence=0.95)
+                               confidence=95.0)
         db.session.add(prediction)
         db.session.commit()
 
         # Verify the full chain
         found = Prediction.query.filter_by(label='phishing').first()
         assert found is not None
-        assert found.confidence == 0.95
+        assert found.confidence == 95.0
         assert found.sandboxSession.website.rootDomain == 'evil-site.com'
         assert found.modelVersion.versionTag == 'v1.0'
         print('✅ Full chain test passed!')
