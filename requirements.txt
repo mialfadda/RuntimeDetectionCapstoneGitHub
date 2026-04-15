@@ -26,3 +26,4 @@ pytest
 reportlab
 pandas
 matplotlib
+python-json-logger
