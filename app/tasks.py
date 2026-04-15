@@ -1,5 +1,6 @@
 from celery import shared_task
 from datetime import datetime
+import os
 
 @shared_task(bind=True, max_retries=3)
 def scan_url(self, submission_id):
@@ -30,22 +31,43 @@ def generate_report(self, prediction_id, format='PDF'):
     try:
         from app import create_app
         from app.database.models import db, Prediction, Reports
+        from app.utils.report_generator import generate_pdf_report, \
+            generate_csv_report, aggregate_detection_data, save_report_to_db
+
         app = create_app()
         with app.app_context():
             prediction = Prediction.query.get(prediction_id)
             if not prediction:
                 return {'error': f'Prediction {prediction_id} not found'}
-            report = Reports(
-                predictionID=prediction_id,
-                format=format,
-                status='complete',
-                threatLevel='high' if prediction.label == 'phishing' else 'low',
-                summary=f'URL scanned with {prediction.confidence}% confidence. Result: {prediction.label}',
-                generationTime=datetime.utcnow()
+
+            # Make sure reports folder exists
+            os.makedirs('reports', exist_ok=True)
+            timestamp = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
+
+            # Generate the report file
+            if format == 'PDF':
+                report_path = f'reports/report_{prediction_id}_{timestamp}.pdf'
+                generate_pdf_report(prediction, report_path)
+            else:
+                report_path = f'reports/report_{prediction_id}_{timestamp}.csv'
+                generate_csv_report([prediction], report_path)
+
+            # Aggregate data
+            summary = aggregate_detection_data([prediction])
+
+            # Save to database
+            report = save_report_to_db(
+                db, Reports, prediction_id, format, report_path, summary
             )
-            db.session.add(report)
-            db.session.commit()
-            return {'report_id': report.reportID, 'status': 'complete'}
+
+            return {
+                'report_id': report.reportID,
+                'prediction_id': prediction_id,
+                'format': format,
+                'file_path': report_path,
+                'status': 'complete'
+            }
+
     except Exception as exc:
         raise self.retry(exc=exc, countdown=60)
 

@@ -23,3 +23,6 @@ celery
 redis
 flask-limiter
 pytest
+reportlab
+pandas
+matplotlib
