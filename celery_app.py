@@ -5,11 +5,11 @@ def make_celery(app):
     celery = Celery(
         app.import_name,
         broker='redis://localhost:6379/0',
-        backend='redis://localhost:6379/0'
+        backend='redis://localhost:6379/0',
+        include=['app.tasks']
     )
+    celery.config_from_object('config.celery_config:CeleryConfig')
 
-    # This makes Celery tasks run inside Flask app context
-    # so they can access the database
     class ContextTask(celery.Task):
         def __call__(self, *args, **kwargs):
             with app.app_context():
@@ -18,6 +18,5 @@ def make_celery(app):
     celery.Task = ContextTask
     return celery
 
-# Create the Flask app and Celery instance
 flask_app = create_app()
 celery = make_celery(flask_app)
