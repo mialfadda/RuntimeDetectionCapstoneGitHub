@@ -12,10 +12,8 @@ def create_app():
     app.config['TESTING'] = False
 
     # JWT config
-    # this is the secret key used to sign all tokens
-    # in production this must be a long random string stored in .env
     app.config['JWT_SECRET_KEY'] = 'dev-secret-key-change-in-production'
-    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600  # token expires after 1 hour
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600
 
     # Connect database to app
     db.init_app(app)
@@ -25,5 +23,9 @@ def create_app():
 
     # Connect JWT to app
     JWTManager(app)
+
+    # Register blueprints
+    from app.api.health import health_bp
+    app.register_blueprint(health_bp)
 
     return app
