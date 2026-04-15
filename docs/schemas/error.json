@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://capstone.alfaisal.edu/schemas/error.json",
+  "title": "ErrorResponse",
+  "type": "object",
+  "required": ["error"],
+  "additionalProperties": true,
+  "properties": {
+    "error": { "type": "string" },
+    "detail": { "type": ["string", "null"] },
+    "required_roles": { "type": "array", "items": { "type": "string" } }
+  }
+}

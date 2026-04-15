@@ -201,6 +201,29 @@ class GrantsPermission(db.Model):
     adminID=db.Column(db.Integer, db.ForeignKey('admins.adminID'), nullable=False)
     userID=db.Column(db.Integer, db.ForeignKey('users.userID'), nullable=False)
 
+# API key — owned by A1 (Step 36). Only the SHA-256 hash of the key is stored.
+class ApiKey(db.Model):
+    __tablename__ = 'apiKeys'
+    keyID = db.Column(db.Integer, primary_key=True)
+    keyHash = db.Column(db.String(128), nullable=False, unique=True)
+    label = db.Column(db.String(100))
+    createdAt = db.Column(db.DateTime, default=datetime.utcnow)
+    lastUsedAt = db.Column(db.DateTime)
+    usageCount = db.Column(db.Integer, default=0)
+    revoked = db.Column(db.Boolean, default=False)
+
+    # FK
+    userID = db.Column(db.Integer, db.ForeignKey('users.userID'), nullable=False)
+
+# Rate-limit violation log — A1 (Step 12)
+class RateLimitViolation(db.Model):
+    __tablename__ = 'rateLimitViolations'
+    violationID = db.Column(db.Integer, primary_key=True)
+    ipAddress = db.Column(db.String(64))
+    endpoint = db.Column(db.String(200))
+    userID = db.Column(db.Integer, db.ForeignKey('users.userID'))
+    creationDate = db.Column(db.DateTime, default=datetime.utcnow)
+
 #manages
 class Manages(db.Model):
     __tablename__ = 'manages'

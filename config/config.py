@@ -48,6 +48,11 @@ class Config:
     MODEL_CONFIDENCE_THRESHOLD = 0.7  # Minimum confidence to flag as malicious
     MODEL_INFERENCE_TIMEOUT = 5  # Seconds before timeout
 
+    # Model upload signing (A1 Step 37). HMAC-SHA256 shared with the build pipeline.
+    MODEL_UPLOAD_SECRET = os.getenv('MODEL_UPLOAD_SECRET', 'dev-model-upload-secret-change-me')
+    MODEL_UPLOAD_MAX_MB = 200
+    MODEL_UPLOAD_ALLOWED_EXT = ('.pkl', '.pt', '.joblib', '.h5', '.onnx')
+
     # ============================================================
     # CELERY (ASYNC TASKS) SETTINGS
     # ============================================================

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://capstone.alfaisal.edu/schemas/scan_request.json",
+  "title": "ScanRequest",
+  "type": "object",
+  "required": ["url"],
+  "additionalProperties": false,
+  "properties": {
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https?://",
+      "maxLength": 2048
+    },
+    "source": { "type": "string", "enum": ["extension", "dashboard", "api", "batch"] },
+    "html_snapshot": { "type": "string", "maxLength": 5000000 },
+    "runtime_evidence": { "$ref": "#/$defs/RuntimeEvidence" }
+  },
+  "$defs": {
+    "RuntimeEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "js_api_calls": { "type": "array", "items": { "type": "string" } },
+        "dom_mutations": { "type": "array", "items": { "type": "object" } },
+        "network_requests": { "type": "array", "items": { "type": "object" } },
+        "timing_ms": { "type": "number", "minimum": 0 }
+      }
+    }
+  }
+}

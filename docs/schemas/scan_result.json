@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://capstone.alfaisal.edu/schemas/scan_result.json",
+  "title": "ScanResult",
+  "type": "object",
+  "required": ["scan_id", "url", "risk_level", "confidence", "threat_category"],
+  "additionalProperties": false,
+  "properties": {
+    "scan_id": { "type": ["integer", "null"] },
+    "url": { "type": "string", "format": "uri" },
+    "risk_level": { "enum": ["safe", "low", "medium", "high", "critical"] },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "threat_category": { "enum": ["benign", "phishing", "malware", "defacement", "spam", "unknown"] },
+    "inference_time_ms": { "type": ["number", "null"], "minimum": 0 },
+    "created_at": { "type": "string", "format": "date-time" },
+    "model_contributions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["model_name", "version", "score", "confidence"],
+        "additionalProperties": false,
+        "properties": {
+          "model_name": { "type": "string" },
+          "version": { "type": "string" },
+          "score": { "type": "number" },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    }
+  }
+}

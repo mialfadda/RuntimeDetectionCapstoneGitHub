@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://capstone.alfaisal.edu/schemas/explanation_result.json",
+  "title": "ExplanationResult",
+  "type": "object",
+  "required": ["scan_id", "method"],
+  "additionalProperties": false,
+  "properties": {
+    "scan_id": { "type": "integer" },
+    "method": { "enum": ["shap", "lime", "llm"] },
+    "top_features": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "prefixItems": [{ "type": "string" }, { "type": "number" }],
+        "minItems": 2,
+        "maxItems": 2
+      }
+    },
+    "shap_values": {
+      "type": ["object", "null"],
+      "additionalProperties": { "type": "number" }
+    },
+    "lime_output": { "type": ["object", "null"] },
+    "summary_text": { "type": ["string", "null"] }
+  }
+}
