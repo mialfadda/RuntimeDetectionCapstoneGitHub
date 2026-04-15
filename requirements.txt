@@ -10,3 +10,16 @@ requests>=2.31.0
 beautifulsoup4>=4.12.0
 redis>=5.0.0
 flask-migrate
+flask
+flask-sqlalchemy
+flask-migrate
+flask-jwt-extended
+flask-marshmallow
+marshmallow
+marshmallow-sqlalchemy
+requests
+beautifulsoup4
+celery
+redis
+flask-limiter
+pytest
