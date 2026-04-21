@@ -2,6 +2,7 @@ from flask import Flask
 from app.database.models import db
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
+from app.api.websocket import socketio
 
 def create_app():
     app = Flask(__name__)
@@ -23,6 +24,9 @@ def create_app():
 
     # Connect JWT to app
     JWTManager(app)
+
+    # Connect SocketIO to app
+    socketio.init_app(app)
 
     # Register blueprints
     from app.api.health import health_bp
