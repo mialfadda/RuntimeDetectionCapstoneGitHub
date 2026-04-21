@@ -42,8 +42,15 @@ jobs:
     - name: Install flake8
       run: pip install flake8
 
+    - name: Create flake8 config
+      run: |
+        echo "[flake8]" > setup.cfg
+        echo "max-line-length = 120" >> setup.cfg
+        echo "ignore = E501,W503,E302,W291,F401,E303,W292,E305,W293,E231,E225,E266,E265,W391,E221,E127,F841,E124,E128" >> setup.cfg
+
     - name: Run linter
-        run: flake8 app/ --max-line-length=120 --ignore=E501,W503,E302,W291,F401,E303,W292,E305,W293,E231,E225,E266,E265,W391,E221,E127,F841,E124,E128
+      run: flake8 app/
+
   build:
     runs-on: ubuntu-latest
     needs: [test, lint]
