@@ -3,10 +3,15 @@ from app.database.models import db
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from app.api.websocket import socketio
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+
+limiter = Limiter(key_func=get_remote_address)
 
 def create_app():
     app = Flask(__name__)
 
+    limiter.init_app(app)
     # Database config
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///capstone.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -30,6 +35,9 @@ def create_app():
 
     # Register blueprints
     from app.api.health import health_bp
+    from app.api.scan import scan_bp
+    
     app.register_blueprint(health_bp)
+    app.register_blueprint(scan_bp)
 
     return app
