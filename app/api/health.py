@@ -53,7 +53,7 @@ def health_check_detailed():
     # Check Redis
     try:
         import redis
-        r = redis.Redis(host='localhost', port=6379, db=0)
+        r = redis.Redis(host='localhost', port=6379, db=0, socket_connect_timeout=1, socket_timeout=1)
         r.ping()
         health_status['components']['redis'] = {
             'status': 'healthy',
@@ -69,7 +69,7 @@ def health_check_detailed():
     # Check Celery
     try:
         from celery_app import celery
-        celery.control.inspect().ping()
+        celery.control.inspect(timeout=1).ping()
         health_status['components']['celery'] = {
             'status': 'healthy',
             'message': 'Celery workers available'
