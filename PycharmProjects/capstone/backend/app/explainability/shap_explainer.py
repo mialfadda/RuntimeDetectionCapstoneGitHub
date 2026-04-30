@@ -30,7 +30,6 @@ class SHAPExplainer:
         shap_values = self.explainer.shap_values(vector)
 
         # Get predicted class
-        import pandas as pd
         predicted_class = int(self.model.predict(
             pd.DataFrame([{f: feature_dict.get(f, 0) for f in self.feature_names}])
         )[0])
