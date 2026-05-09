@@ -1,8 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="aebd3ac5-e70b-4909-8101-faa28e11312c" name="Changes" comment="commit Step 6: Set Up Configuration Management from steps">
-      <change beforePath="$PROJECT_DIR$/docs/DEPLOYMENT.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/DEPLOYMENT.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/RuntimeDetectionCapstone.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/RuntimeDetectionCapstone.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/auth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/health.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/health.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/scan.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/scan.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/websocket.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/websocket.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/explainability/explainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/explainability/explainer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/interfaces/mocks.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/interfaces/mocks.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/malicious_detector.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/malicious_detector.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/utils/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/utils/auth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/utils/validators.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/utils/validators.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/run.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,12 +42,12 @@
     &quot;assignee&quot;: &quot;mialfadda&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/mialfadda/RuntimeDetectionCapstoneGitHub.git&quot;,
-    &quot;accountId&quot;: &quot;a67dc9e4-6c37-454e-a6a1-05b71d681025&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/mialfadda/RuntimeDetectionCapstoneGitHub.git",
+    "accountId": "a6bae148-36f0-4c6a-9a71-fb6f063b1786"
   }
-}</component>
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
 }</component>
@@ -40,22 +56,31 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;Python tests.Python tests in model_test.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in test_models.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python.__init__.executor&quot;: &quot;Run&quot;,
-    &quot;Python.models.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_models.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test_setup.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/mawya/PycharmProjects/RuntimeDetectionCapstone/logs&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python tests.Python tests in model_test.py.executor": "Run",
+    "Python tests.Python tests in test_models.py.executor": "Run",
+    "Python.__init__.executor": "Run",
+    "Python.models.executor": "Run",
+    "Python.test_models.executor": "Run",
+    "Python.test_setup.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "master",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "C:/Users/mawya/PycharmProjects/RuntimeDetectionCapstone/logs",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\mawya\PycharmProjects\RuntimeDetectionCapstone\logs" />
@@ -65,7 +90,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-4762d8aabb82-6d6dccd035ac-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.30387.173" />
+        <option value="bundled-python-sdk-b63d5a1f7c97-b61e75351b1f-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-261.22158.340" />
       </set>
     </attachedChunks>
   </component>
@@ -76,6 +101,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1771011827945</updated>
+      <workItem from="1778263016818" duration="2220000" />
     </task>
     <task id="LOCAL-00001" summary="initial commit">
       <option name="closed" value="true" />
@@ -143,6 +169,9 @@
     </task>
     <option name="localTasksCounter" value="9" />
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="initial commit" />

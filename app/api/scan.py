@@ -29,7 +29,7 @@ def analyze():
     user_id = int(get_jwt_identity())
     submission = URLSubmission(
         url=url, submissionSource=data.get("source", "extension"),
-        status="processing", userID=user_id,
+        status="pending", userID=user_id,
     )
     db.session.add(submission)
     db.session.flush()
@@ -37,7 +37,7 @@ def analyze():
     result = run_pipeline(ScanRequest(url=url, user_id=user_id, runtime_evidence=evidence))
     result.scan_id = submission.submissionID
 
-    submission.status = "completed"
+    submission.status = "complete"
     # We do not have a ModelVersion/Session yet — record inference summary on URLSubmission
     # and defer full Prediction row to the real pipeline (B1/B2) integration.
     current_app.logger.info(

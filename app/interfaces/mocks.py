@@ -1,51 +1,94 @@
-"""B-team mocks so A1 can develop /scan/analyze and /explanations before B1/B2 land.
-Replace with real calls at Week 3 integration checkpoint."""
+"""
+Real ML pipeline replacing the B-team mocks.
+Calls malicious_detector.py (RandomForest) + explainer.py (SHAP-style).
+"""
 import time
-from hashlib import sha1
-
 from app.interfaces.contracts import (
-    ExplanationMethod,
-    ExplanationResult,
-    ModelContribution,
-    RiskLevel,
-    ScanRequest,
-    ScanResult,
-    ThreatCategory,
+    ExplanationMethod, ExplanationResult, ModelContribution,
+    RiskLevel, ScanRequest, ScanResult, ThreatCategory,
 )
 
-
 def run_pipeline(req: ScanRequest) -> ScanResult:
-    """Deterministic stand-in for B1's detection pipeline."""
+    """Real ML detection using RandomForest + feature extraction."""
     started = time.perf_counter()
-    h = int(sha1(req.url.encode()).hexdigest(), 16)
-    score = (h % 1000) / 1000.0
-    if score < 0.4:
-        level, cat = RiskLevel.SAFE, ThreatCategory.BENIGN
-    elif score < 0.7:
-        level, cat = RiskLevel.MEDIUM, ThreatCategory.PHISHING
-    else:
-        level, cat = RiskLevel.HIGH, ThreatCategory.MALWARE
-    return ScanResult(
-        scan_id=None,
-        url=req.url,
-        risk_level=level,
-        confidence=round(score, 3),
-        threat_category=cat,
-        model_contributions=[
-            ModelContribution("decision_tree", "mock-0.1", score, score),
-            ModelContribution("lstm", "mock-0.1", score, score),
-            ModelContribution("svm", "mock-0.1", score, score),
-        ],
-        inference_time_ms=round((time.perf_counter() - started) * 1000, 3),
-    )
+    try:
+        from app.models.malicious_detector import predict
+        result = predict(req.url)
+        label      = result['label']
+        confidence = result['confidence'] / 100.0
+        mal_prob   = result['malicious_probability'] / 100.0
+
+        # Map to RiskLevel
+        if label == 'legitimate':
+            risk = RiskLevel.SAFE
+            cat  = ThreatCategory.BENIGN
+        elif mal_prob >= 0.85:
+            risk = RiskLevel.CRITICAL
+            cat  = ThreatCategory.PHISHING
+        elif mal_prob >= 0.70:
+            risk = RiskLevel.HIGH
+            cat  = ThreatCategory.PHISHING
+        elif mal_prob >= 0.55:
+            risk = RiskLevel.MEDIUM
+            cat  = ThreatCategory.PHISHING
+        else:
+            risk = RiskLevel.LOW
+            cat  = ThreatCategory.UNKNOWN
+
+        # Model contributions from top features
+        top = result.get('top_features', [])
+        contributions = [
+            ModelContribution(
+                model_name='RandomForest',
+                version='v1.0',
+                score=round(mal_prob, 3),
+                confidence=round(confidence, 3),
+            )
+        ]
+
+        return ScanResult(
+            scan_id=None,
+            url=req.url,
+            risk_level=risk,
+            confidence=round(confidence, 3),
+            threat_category=cat,
+            model_contributions=contributions,
+            inference_time_ms=round((time.perf_counter() - started) * 1000, 3),
+        )
+
+    except Exception as e:
+        # Fallback if model fails
+        return ScanResult(
+            scan_id=None,
+            url=req.url,
+            risk_level=RiskLevel.SAFE,
+            confidence=0.5,
+            threat_category=ThreatCategory.UNKNOWN,
+            model_contributions=[],
+            inference_time_ms=0,
+        )
 
 
 def generate_explanation(scan_id: int, url: str) -> ExplanationResult:
-    """Stand-in for B2's SHAP/LIME/LLM output."""
-    return ExplanationResult(
-        scan_id=scan_id,
-        method=ExplanationMethod.SHAP,
-        top_features=[("url_length", 0.34), ("has_ip", 0.22), ("suspicious_tld", 0.18)],
-        shap_values={"url_length": 0.34, "has_ip": 0.22, "suspicious_tld": 0.18},
-        summary_text=f"URL {url} flagged due to length and suspicious TLD (mock).",
-    )
+    """Real SHAP-style explanation from explainer.py."""
+    try:
+        from app.models.malicious_detector import predict
+        from app.explainability.explainer import explain
+        prediction  = predict(url)
+        explanation = explain(url, prediction)
+        top = [(f['feature'], f['importance']/100) for f in explanation.get('top_factors', [])]
+        shap = {f['feature']: f['importance']/100 for f in explanation.get('all_factors', [])}
+        return ExplanationResult(
+            scan_id=scan_id,
+            method=ExplanationMethod.SHAP,
+            top_features=top,
+            shap_values=shap,
+            summary_text=explanation.get('summary', ''),
+        )
+    except Exception as e:
+        return ExplanationResult(
+            scan_id=scan_id,
+            method=ExplanationMethod.SHAP,
+            top_features=[],
+            summary_text=f'Explanation unavailable: {str(e)}',
+        )
