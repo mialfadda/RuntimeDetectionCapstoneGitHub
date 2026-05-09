@@ -10,6 +10,7 @@ import Register from './pages/Register';
 import Scan from './pages/Scan';
 import Extension from './pages/Extension';
 import Explanation from './pages/Explanation';
+import Warning from './pages/Warning';
 
 import Dashboard from './pages/Dashboard';
 import Scans from './pages/Scans';
@@ -29,6 +30,7 @@ export default function App() {
             <Route path="scan" element={<Scan />} />
             <Route path="extension" element={<Extension />} />
             <Route path="explanation/:scanId" element={<Explanation />} />
+            <Route path="warning" element={<Warning />} />
           </Route>
 
           {/* Protected dashboard with sidebar */}

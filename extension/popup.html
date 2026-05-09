@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Runtime Detector</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup">
+    <div class="header">
+      <h1>Runtime Detector</h1>
+    </div>
+
+    <!-- Login form -->
+    <div id="login-section" class="section hidden">
+      <input type="email" id="email" placeholder="Email" />
+      <input type="password" id="password" placeholder="Password" />
+      <button id="login-btn" class="btn primary">Sign In</button>
+      <div id="login-error" class="error hidden"></div>
+    </div>
+
+    <!-- Logged-in view -->
+    <div id="main-section" class="section hidden">
+      <div id="user-info" class="user-info"></div>
+
+      <div class="scan-box">
+        <input type="url" id="scan-url" placeholder="Enter URL to scan..." />
+        <button id="scan-btn" class="btn primary">Scan</button>
+      </div>
+
+      <div id="scan-result" class="result hidden"></div>
+
+      <div id="last-scan" class="last-scan hidden">
+        <div class="label">Last auto-scan:</div>
+        <div id="last-scan-info"></div>
+      </div>
+
+      <button id="logout-btn" class="btn secondary">Log Out</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

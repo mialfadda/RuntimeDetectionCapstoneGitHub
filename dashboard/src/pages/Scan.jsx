@@ -25,6 +25,12 @@ export default function Scan() {
         method: 'POST',
         body: JSON.stringify({ url, source: 'dashboard' }),
       });
+      // Navigate to warning page for malicious results
+      const v = mapVerdict(data.risk_level);
+      if (v === 'malicious') {
+        navigate(`/warning?scan_id=${data.scan_id}&url=${encodeURIComponent(data.url)}&confidence=${Math.round(data.confidence * 100)}&category=${data.threat_category}`);
+        return;
+      }
       setResult(data);
     } catch (err) {
       setError(err.message);
@@ -89,36 +95,6 @@ export default function Scan() {
           </div>
         )}
 
-        {/* Warning interstitial for malicious */}
-        {result && verdict === 'malicious' && (
-          <div className="mt-8 border-2 border-[#ef4444] rounded-xl p-8 bg-white text-center">
-            <div className="text-5xl mb-4">&#x26A0;</div>
-            <h2 className="text-2xl font-bold text-[#ef4444] mb-2">WARNING!</h2>
-            <p className="text-gray-600 mb-6">This site may be malicious</p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
-                to={`/explanation/${result.scan_id}`}
-                className="px-6 py-2.5 bg-[#2D5FA6] text-white rounded-lg font-semibold text-sm hover:bg-[#1A3A6B] transition-colors"
-              >
-                View Explanation
-              </Link>
-              <a
-                href={result.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-6 py-2.5 border border-gray-300 text-gray-600 rounded-lg font-semibold text-sm hover:bg-gray-50 transition-colors"
-              >
-                Proceed Anyway
-              </a>
-              <button
-                onClick={() => { setResult(null); setUrl(''); }}
-                className="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg font-semibold text-sm hover:bg-gray-200 transition-colors"
-              >
-                Go Back
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
