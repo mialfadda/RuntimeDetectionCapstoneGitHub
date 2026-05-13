@@ -89,6 +89,12 @@
       <div class="tab-content" id="tab-settings">
         <button class="back-btn" data-back-to="overview">&larr; Back</button>
         <div class="section">
+          <div style="font-size:11px;color:var(--text-muted);font-weight:600;margin-bottom:6px;">API Base URL</div>
+          <input type="text" id="setting-api-base" placeholder="https://..." style="width:100%;margin-bottom:6px;" />
+          <button id="setting-api-save" class="btn secondary" style="width:100%;">Save API URL</button>
+          <div id="setting-api-msg" style="font-size:11px;margin-top:4px;color:var(--text-muted);"></div>
+        </div>
+        <div class="section">
           <div class="setting-row">
             <span class="setting-label">Auto-scan on navigation</span>
             <label class="toggle"><input type="checkbox" id="setting-autoscan" checked /><span class="slider"></span></label>

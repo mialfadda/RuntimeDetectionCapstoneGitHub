@@ -1,4 +1,15 @@
-const API_BASE = 'http://localhost:5000';
+// REPLACE-WITH-RAILWAY-URL after deployment.
+const DEFAULT_API_BASE = 'https://REPLACE-WITH-RAILWAY-URL.railway.app';
+
+// User can override at runtime by saving `api_base` to chrome.storage.local
+// from the popup Settings page.
+async function getApiBase() {
+  const stored = await chrome.storage.local.get('api_base');
+  return (stored && stored.api_base) || DEFAULT_API_BASE;
+}
+
+// Back-compat shim — older code referenced API_BASE directly.
+const API_BASE = DEFAULT_API_BASE;
 
 // --- Token helpers ---
 async function getTokens() {
@@ -16,15 +27,16 @@ async function clearTokens() {
 
 // --- Authenticated fetch with auto-refresh ---
 async function apiFetch(path, options = {}) {
+  const base = await getApiBase();
   const { access_token, refresh_token } = await getTokens();
   const headers = { 'Content-Type': 'application/json', ...options.headers };
   if (access_token) headers['Authorization'] = `Bearer ${access_token}`;
 
-  let res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  let res = await fetch(`${base}${path}`, { ...options, headers });
 
   if (res.status === 401 && refresh_token) {
     // Try refreshing
-    const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
+    const refreshRes = await fetch(`${base}/auth/refresh`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -35,7 +47,7 @@ async function apiFetch(path, options = {}) {
       const data = await refreshRes.json();
       await setTokens(data.access_token, refresh_token);
       headers['Authorization'] = `Bearer ${data.access_token}`;
-      res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+      res = await fetch(`${base}${path}`, { ...options, headers });
     } else {
       await clearTokens();
       throw new Error('Session expired');
@@ -147,6 +159,18 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === 'GET_EXPLANATION') {
     apiFetch(`/explanations/${msg.scan_id}`)
       .then((data) => sendResponse({ ok: true, data }))
+      .catch((e) => sendResponse({ ok: false, error: e.message }));
+    return true;
+  }
+
+  if (msg.type === 'GET_API_BASE') {
+    getApiBase().then((url) => sendResponse({ ok: true, url, default: DEFAULT_API_BASE }));
+    return true;
+  }
+
+  if (msg.type === 'SET_API_BASE') {
+    chrome.storage.local.set({ api_base: (msg.url || '').trim() })
+      .then(() => sendResponse({ ok: true }))
       .catch((e) => sendResponse({ ok: false, error: e.message }));
     return true;
   }

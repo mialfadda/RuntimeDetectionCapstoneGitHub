@@ -200,4 +200,25 @@ document.addEventListener('DOMContentLoaded', () => {
       scanUrlInput.value = tabs[0].url;
     }
   });
+
+  // API Base URL setting
+  const apiBaseInput = document.getElementById('setting-api-base');
+  const apiBaseSave = document.getElementById('setting-api-save');
+  const apiBaseMsg = document.getElementById('setting-api-msg');
+  if (apiBaseInput && apiBaseSave) {
+    chrome.runtime.sendMessage({ type: 'GET_API_BASE' }, (res) => {
+      if (res && res.ok) {
+        apiBaseInput.value = res.url || '';
+        apiBaseMsg.textContent = 'Default: ' + (res.default || 'http://localhost:5000');
+      }
+    });
+    apiBaseSave.addEventListener('click', () => {
+      chrome.runtime.sendMessage(
+        { type: 'SET_API_BASE', url: apiBaseInput.value },
+        (res) => {
+          apiBaseMsg.textContent = res && res.ok ? 'Saved ✅' : 'Save failed';
+        }
+      );
+    });
+  }
 });

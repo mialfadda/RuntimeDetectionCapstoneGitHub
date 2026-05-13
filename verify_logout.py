@@ -1,11 +1,13 @@
 """Verify JWT logout actually revokes the token."""
+import os
+os.environ['DATABASE_URL'] = 'sqlite:///:memory:'
+
 from app import create_app
 from app.database.models import db
 
 
 def main():
     app = create_app()
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     app.config['TESTING'] = True
     with app.app_context():
         db.create_all()

@@ -1,3 +1,5 @@
+export const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';

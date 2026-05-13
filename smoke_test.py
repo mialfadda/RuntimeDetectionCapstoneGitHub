@@ -3,7 +3,9 @@ import json
 import os
 import sys
 
-os.environ['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+# create_app() reads DATABASE_URL — set it before importing so we get a
+# truly isolated in-memory DB.
+os.environ['DATABASE_URL'] = 'sqlite:///:memory:'
 
 from app import create_app
 from app.database.models import db
@@ -11,7 +13,6 @@ from app.database.models import db
 
 def main():
     app = create_app()
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
     app.config['TESTING'] = True
     with app.app_context():
         db.create_all()

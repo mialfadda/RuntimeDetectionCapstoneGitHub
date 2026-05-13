@@ -134,11 +134,12 @@ class ProductionConfig(Config):
     DEBUG = False
     TESTING = False
 
-    # Production database (PostgreSQL)
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        'DATABASE_URL',
-        'postgresql://user:password@localhost:5432/phishing_detection'
-    )
+    # Production database — Supabase Postgres in deployment, SQLite locally.
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///capstone.db')
+
+    # Required in production. Set these as Railway env vars.
+    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'change-this-in-production')
+    SECRET_KEY = os.getenv('SECRET_KEY', 'change-this-in-production')
 
     # Strict rate limits for production
     RATE_LIMIT_PER_MINUTE = 60

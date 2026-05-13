@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
@@ -11,19 +13,31 @@ limiter = Limiter(key_func=get_remote_address)
 def create_app():
     app = Flask(__name__)
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///capstone.db'
+    # Postgres URIs from some providers start with "postgres://" but SQLAlchemy
+    # 2.x only accepts "postgresql://" — rewrite it transparently.
+    db_url = os.getenv('DATABASE_URL', 'sqlite:///capstone.db')
+    if db_url.startswith('postgres://'):
+        db_url = 'postgresql://' + db_url[len('postgres://'):]
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['JWT_SECRET_KEY'] = 'dev-secret-key-change-in-production'
+    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'dev-secret-key-change-in-production')
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', app.config['JWT_SECRET_KEY'])
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600
     app.config['REPORTS_DIR'] = 'reports'
     app.config['MODEL_DIR'] = 'models'
-    app.config['MODEL_UPLOAD_SECRET'] = 'dev-model-upload-secret'
+    app.config['MODEL_UPLOAD_SECRET'] = os.getenv('MODEL_UPLOAD_SECRET', 'dev-model-upload-secret')
     app.config['MODEL_UPLOAD_MAX_MB'] = 200
     app.config['MODEL_UPLOAD_ALLOWED_EXT'] = ('.pkl', '.pt', '.joblib', '.h5', '.onnx')
 
+    frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:5173')
     CORS(app,
-         origins=["http://localhost:5173", "http://localhost:3000",
-                  "chrome-extension://*"],
+         origins=[
+             frontend_url,
+             "http://localhost:5173",
+             "http://localhost:3000",
+             "chrome-extension://*",
+         ],
          supports_credentials=True,
          allow_headers=["Authorization", "Content-Type"])
 

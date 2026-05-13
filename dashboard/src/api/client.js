@@ -1,5 +1,10 @@
+const ENV_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) || '';
+
 function getApiBase() {
-  return (typeof localStorage !== 'undefined' && localStorage.getItem('api_base')) || '';
+  // Settings page can override per-browser; otherwise fall back to the
+  // build-time VITE_API_URL (production: Railway; dev: Vite proxy '').
+  const override = (typeof localStorage !== 'undefined' && localStorage.getItem('api_base')) || '';
+  return override || ENV_BASE;
 }
 
 export function getToken() {
