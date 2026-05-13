@@ -28,6 +28,7 @@ export default function Register() {
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center bg-gray-50 px-6">
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8">
+        <Link to="/" className="text-[#2D5FA6] hover:underline text-sm mb-4 inline-block">&larr; Back to Home</Link>
         <h2 className="text-2xl font-bold text-[#1A3A6B] text-center mb-6">Create Account</h2>
         {error && <div className="bg-red-50 border border-red-200 text-[#ef4444] rounded-lg p-3 mb-4 text-sm">{error}</div>}
         <form onSubmit={handleSubmit} className="space-y-4">

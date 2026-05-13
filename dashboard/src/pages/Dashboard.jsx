@@ -19,7 +19,9 @@ export default function Dashboard() {
   const [scans, setScans] = useState([]);
   const [error, setError] = useState('');
 
-  useEffect(() => {
+  function load() {
+    setError('');
+    setMetrics(null);
     Promise.all([
       api('/dashboard/metrics'),
       api('/detections?limit=50'),
@@ -29,9 +31,16 @@ export default function Dashboard() {
         setScans(d.detections || []);
       })
       .catch(e => setError(e.message));
-  }, []);
+  }
 
-  if (error) return <div className="p-8 text-[#ef4444]">{error}</div>;
+  useEffect(() => { load(); }, []);
+
+  if (error) return (
+    <div className="p-8">
+      <div className="text-[#ef4444] mb-3">{error}</div>
+      <button onClick={load} className="bg-[#2D5FA6] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#1A3A6B]">Retry</button>
+    </div>
+  );
   if (!metrics) return <div className="p-8 text-gray-500">Loading dashboard...</div>;
 
   return (

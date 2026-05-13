@@ -14,13 +14,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const alertsList = document.getElementById('alerts-list');
 
   // Tab switching
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === 'tab-' + name));
+  }
   document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      tab.classList.add('active');
-      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
-    });
+    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+  });
+
+  // Back-to-tab buttons inside content panes
+  document.querySelectorAll('.back-btn[data-back-to]').forEach(b => {
+    b.addEventListener('click', () => switchTab(b.dataset.backTo));
+  });
+
+  // Alert detail back button
+  const alertDetail = document.getElementById('alert-detail');
+  const alertDetailBody = document.getElementById('alert-detail-body');
+  document.getElementById('alert-detail-back').addEventListener('click', () => {
+    alertDetail.classList.add('hidden');
   });
 
   function mapVerdict(riskLevel) {
@@ -49,12 +60,54 @@ document.addEventListener('DOMContentLoaded', () => {
     if (empty) empty.remove();
 
     const item = document.createElement('div');
-    item.className = 'alert-item';
+    item.className = 'alert-item clickable';
+    item.title = 'View explanation';
     item.innerHTML =
       '<div class="alert-dot ' + dotCls + '"></div>' +
-      '<div class="alert-url">' + data.url + '</div>' +
-      '<div class="alert-time">now</div>';
+      '<div class="alert-url">' + escapeHtml(data.url) + '</div>' +
+      '<div class="alert-time">' + Math.round(data.confidence * 100) + '%</div>';
+    item.addEventListener('click', () => openExplanation(data));
     alertsList.prepend(item);
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  async function openExplanation(scanData) {
+    switchTab('alerts');
+    alertDetail.classList.remove('hidden');
+    alertDetailBody.innerHTML = '<div class="alert-detail-card">Loading explanation...</div>';
+    try {
+      const exp = await new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage(
+          { type: 'GET_EXPLANATION', scan_id: scanData.scan_id },
+          (res) => res && res.ok ? resolve(res.data) : reject(new Error((res && res.error) || 'Load failed'))
+        );
+      });
+      const features = exp.top_features || [];
+      alertDetailBody.innerHTML =
+        '<div class="alert-detail-card">' +
+        '<div class="label">URL</div>' +
+        '<div style="word-break:break-all;margin-bottom:8px;">' + escapeHtml(scanData.url) + '</div>' +
+        '<div class="label">Verdict</div>' +
+        '<div style="margin-bottom:8px;">' + mapVerdict(scanData.risk_level).label +
+        ' &middot; ' + Math.round(scanData.confidence * 100) + '%</div>' +
+        '<div class="label">Summary</div>' +
+        '<div style="margin-bottom:8px;">' + escapeHtml(exp.summary_text || 'No summary available.') + '</div>' +
+        (features.length ? (
+          '<div class="label">Top indicators (' + (exp.method || 'shap').toUpperCase() + ')</div>' +
+          features.map(([name, score]) =>
+            '<div class="feature"><span>' + escapeHtml(name) + '</span>' +
+            '<span style="font-weight:600;">' + Math.round(score * 100) + '%</span></div>'
+          ).join('')
+        ) : '') +
+        '</div>';
+    } catch (e) {
+      alertDetailBody.innerHTML = '<div class="alert-detail-card" style="color:var(--danger)">' + escapeHtml(e.message) + '</div>';
+    }
   }
 
   // Check login status

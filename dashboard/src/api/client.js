@@ -1,4 +1,6 @@
-const API = '';
+function getApiBase() {
+  return (typeof localStorage !== 'undefined' && localStorage.getItem('api_base')) || '';
+}
 
 export function getToken() {
   return sessionStorage.getItem('access_token');
@@ -24,7 +26,7 @@ export function clearTokens() {
 async function refreshAccessToken() {
   const rt = getRefreshToken();
   if (!rt) throw new Error('No refresh token');
-  const res = await fetch(`${API}/auth/refresh`, {
+  const res = await fetch(`${getApiBase()}/auth/refresh`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -46,12 +48,12 @@ export async function api(path, options = {}) {
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  let res = await fetch(`${API}${path}`, { ...options, headers });
+  let res = await fetch(`${getApiBase()}${path}`, { ...options, headers });
 
   if (res.status === 401 && getRefreshToken() && !options._retried) {
     const newToken = await refreshAccessToken();
     headers.Authorization = `Bearer ${newToken}`;
-    res = await fetch(`${API}${path}`, { ...options, headers, _retried: true });
+    res = await fetch(`${getApiBase()}${path}`, { ...options, headers, _retried: true });
   }
 
   if (!res.ok) {
@@ -67,7 +69,7 @@ export async function apiFetchBlob(path) {
   const token = getToken();
   const headers = {};
   if (token) headers.Authorization = `Bearer ${token}`;
-  const res = await fetch(`${API}${path}`, { headers });
+  const res = await fetch(`${getApiBase()}${path}`, { headers });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     throw new Error(body.error || 'Download failed');

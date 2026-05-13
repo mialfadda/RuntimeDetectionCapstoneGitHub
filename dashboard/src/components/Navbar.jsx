@@ -19,7 +19,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
         {/* Logo */}
         <Link to="/" className="text-[#2D5FA6] font-bold text-xl tracking-wide">
-          PLACEHOLDER
+          Runtime Detector
         </Link>
 
         {/* Links */}

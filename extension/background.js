@@ -70,25 +70,50 @@ async function scanUrl(url) {
   });
 }
 
+// Skip non-web URLs (chrome://, chrome-extension://, about:, moz-extension://, file://, ...)
+function isSkippableUrl(url) {
+  if (!url) return true;
+  return !(url.startsWith('http://') || url.startsWith('https://'));
+}
+
+let threatCount = 0;
+function updateBadge() {
+  if (threatCount > 0) {
+    chrome.action.setBadgeText({ text: String(threatCount) });
+    chrome.action.setBadgeBackgroundColor({ color: '#ef4444' });
+  } else {
+    chrome.action.setBadgeText({ text: '' });
+  }
+}
+
 // --- Navigation listener: scan on every page load ---
 chrome.webNavigation.onCompleted.addListener(async (details) => {
   if (details.frameId !== 0) return; // main frame only
-  const url = details.url;
-  if (!url.startsWith('http://') && !url.startsWith('https://')) return;
+  if (isSkippableUrl(details.url)) return;
 
   const { access_token } = await getTokens();
   if (!access_token) return; // not logged in
 
   try {
-    const result = await scanUrl(url);
-    // If high/critical, notify the content script to show warning
+    const result = await scanUrl(details.url);
+
     if (result.risk_level === 'high' || result.risk_level === 'critical') {
-      chrome.tabs.sendMessage(details.tabId, {
-        type: 'THREAT_DETECTED',
-        data: result,
-      }).catch(() => {}); // content script may not be ready
+      threatCount++;
+      updateBadge();
+      // Tell the content script to show the overlay. Send under both names
+      // (THREAT_DETECTED and SHOW_WARNING) so either listener works.
+      const payload = {
+        severity: result.risk_level,
+        reason: 'This site may be malicious',
+        confidence: result.confidence,
+        url: result.url,
+        threat_category: result.threat_category,
+        scan_id: result.scan_id,
+        explanation: {},
+      };
+      chrome.tabs.sendMessage(details.tabId, { type: 'SHOW_WARNING', data: payload }).catch(() => {});
+      chrome.tabs.sendMessage(details.tabId, { type: 'THREAT_DETECTED', data: result }).catch(() => {});
     }
-    // Store last scan result for popup
     await chrome.storage.local.set({ lastScan: result });
   } catch (e) {
     console.warn('Scan failed:', e.message);
@@ -114,6 +139,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
   if (msg.type === 'SCAN') {
     scanUrl(msg.url)
+      .then((data) => sendResponse({ ok: true, data }))
+      .catch((e) => sendResponse({ ok: false, error: e.message }));
+    return true;
+  }
+
+  if (msg.type === 'GET_EXPLANATION') {
+    apiFetch(`/explanations/${msg.scan_id}`)
       .then((data) => sendResponse({ ok: true, data }))
       .catch((e) => sendResponse({ ok: false, error: e.message }));
     return true;

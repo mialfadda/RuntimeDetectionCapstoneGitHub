@@ -41,7 +41,7 @@ def metrics():
     completed = (
         db.session.query(func.count(URLSubmission.submissionID))
         .filter(URLSubmission.creationDate.between(start, end))
-        .filter(URLSubmission.status == "completed")
+        .filter(URLSubmission.status == "complete")
         .scalar()
     )
     return jsonify({

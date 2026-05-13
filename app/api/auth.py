@@ -23,6 +23,13 @@ def login():
     u=User.query.filter_by(email=(d.get("email") or "").strip().lower()).first()
     if not u or not verify_password(d.get("password",""),u.passwordHash): return jsonify({"error":"invalid credentials"}),401
     return jsonify({"user_id":u.userID,**_tokens(u)}),200
+@auth_bp.post("/refresh")
+@jwt_required(refresh=True)
+def refresh():
+    uid=get_jwt_identity(); claims=get_jwt()
+    u=db.session.get(User,int(uid))
+    if not u: return jsonify({"error":"user not found"}),404
+    return jsonify({"access_token":create_access_token(identity=uid,additional_claims={"role":u.role,"email":u.email})}),200
 @auth_bp.post("/logout")
 @jwt_required()
 def logout(): _REVOKED.add(get_jwt()["jti"]); return jsonify({"message":"logged out"}),200

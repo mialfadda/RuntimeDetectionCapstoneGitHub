@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { api, apiFetchBlob } from '../api/client';
 
 export default function Reports() {
@@ -11,6 +12,8 @@ export default function Reports() {
   const [genLoading, setGenLoading] = useState(false);
 
   function loadReports() {
+    setLoading(true);
+    setError('');
     api('/dashboard/reports')
       .then(d => setReports(d.reports || []))
       .catch(e => setError(e.message))
@@ -56,6 +59,7 @@ export default function Reports() {
 
   return (
     <div className="flex-1 p-8">
+      <Link to="/app" className="text-[#2D5FA6] hover:underline text-sm mb-4 inline-block">&larr; Back to Dashboard</Link>
       <h2 className="text-xl font-bold text-[#1A3A6B] mb-6">Reports</h2>
 
       {/* Generate */}
@@ -83,7 +87,12 @@ export default function Reports() {
         {genMsg && <p className="mt-2 text-sm text-gray-600">{genMsg}</p>}
       </div>
 
-      {error && <div className="mb-4 text-[#ef4444] text-sm">{error}</div>}
+      {error && (
+        <div className="mb-4 flex items-center gap-3">
+          <div className="text-[#ef4444] text-sm">{error}</div>
+          <button onClick={loadReports} className="text-[#2D5FA6] hover:underline text-sm font-medium">Retry</button>
+        </div>
+      )}
 
       {/* Table */}
       <div className="bg-white rounded-xl shadow overflow-hidden">

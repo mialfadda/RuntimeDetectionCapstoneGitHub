@@ -52,15 +52,21 @@
 
       <!-- Alerts tab -->
       <div class="tab-content" id="tab-alerts">
+        <button class="back-btn" data-back-to="overview">&larr; Overview</button>
         <div class="section">
           <div id="alerts-list">
             <div class="empty">No alerts yet. Browse the web to start scanning.</div>
           </div>
         </div>
+        <div class="section hidden" id="alert-detail">
+          <button class="back-btn" id="alert-detail-back">&larr; Back</button>
+          <div id="alert-detail-body"></div>
+        </div>
       </div>
 
       <!-- Processes tab -->
       <div class="tab-content" id="tab-processes">
+        <button class="back-btn" data-back-to="overview">&larr; Overview</button>
         <div class="section">
           <div id="processes-list">
             <div class="process-item">
@@ -81,6 +87,7 @@
 
       <!-- Settings tab -->
       <div class="tab-content" id="tab-settings">
+        <button class="back-btn" data-back-to="overview">&larr; Back</button>
         <div class="section">
           <div class="setting-row">
             <span class="setting-label">Auto-scan on navigation</span>

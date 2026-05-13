@@ -8,15 +8,25 @@ export default function Explanation() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
+  function load() {
+    setLoading(true);
+    setError('');
     api(`/explanations/${scanId}`)
       .then(setData)
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
-  }, [scanId]);
+  }
+
+  useEffect(() => { load(); }, [scanId]);
 
   if (loading) return <div className="flex items-center justify-center min-h-[60vh] text-gray-500">Loading explanation...</div>;
-  if (error) return <div className="flex items-center justify-center min-h-[60vh] text-[#ef4444]">{error}</div>;
+  if (error) return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
+      <div className="text-[#ef4444]">{error}</div>
+      <button onClick={load} className="bg-[#2D5FA6] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#1A3A6B]">Retry</button>
+      <Link to="/scan" className="text-[#2D5FA6] hover:underline text-sm">&larr; Back to Scanner</Link>
+    </div>
+  );
 
   const features = data?.top_features || [];
   const shapValues = data?.shap_values || {};
@@ -64,14 +74,22 @@ export default function Explanation() {
         {/* Confidence & Recommendation */}
         <div className="bg-white rounded-xl shadow p-6">
           <h2 className="text-lg font-semibold text-[#1A3A6B] mb-3">Confidence & Recommendation</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="bg-[#dde6f5] rounded-lg p-4 text-center">
               <div className="text-sm text-gray-600 mb-1">Method</div>
               <div className="text-lg font-bold text-[#1A3A6B] uppercase">{data?.method || 'N/A'}</div>
             </div>
             <div className="bg-[#dde6f5] rounded-lg p-4 text-center">
+              <div className="text-sm text-gray-600 mb-1">Confidence</div>
+              <div className="text-lg font-bold text-[#1A3A6B]">
+                {data?.confidence != null ? Math.round(data.confidence * 100) + '%' : '—'}
+              </div>
+            </div>
+            <div className="bg-[#dde6f5] rounded-lg p-4 text-center">
               <div className="text-sm text-gray-600 mb-1">Recommendation</div>
-              <div className="text-lg font-bold text-[#ef4444]">Avoid this site</div>
+              <div className="text-lg font-bold text-[#ef4444]">
+                {features.length > 0 ? 'Avoid this site' : 'Likely safe'}
+              </div>
             </div>
           </div>
         </div>
