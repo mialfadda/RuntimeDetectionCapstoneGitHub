@@ -1,4 +1,4 @@
-const DEFAULT_API_BASE = 'https://web-production-2a0b62.up.railway.app';
+const DEFAULT_API_BASE = 'http://localhost:5000';
 
 // User can override at runtime by saving `api_base` to chrome.storage.local
 // from the popup Settings page.
@@ -97,6 +97,22 @@ function updateBadge() {
   }
 }
 
+// Restore threatCount from persisted alerts on service worker startup
+chrome.storage.local.get('alerts').then(({ alerts }) => {
+  if (Array.isArray(alerts)) {
+    threatCount = alerts.filter(a => a.risk_level === 'high' || a.risk_level === 'critical').length;
+    updateBadge();
+  }
+});
+
+async function pushAlert(result) {
+  const { alerts } = await chrome.storage.local.get('alerts');
+  const list = Array.isArray(alerts) ? alerts : [];
+  list.unshift({ ...result, scanned_at: Date.now() });
+  if (list.length > 50) list.length = 50; // cap at 50
+  await chrome.storage.local.set({ alerts: list });
+}
+
 // --- Navigation listener: scan on every page load ---
 chrome.webNavigation.onCompleted.addListener(async (details) => {
   if (details.frameId !== 0) return; // main frame only
@@ -107,6 +123,9 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
 
   try {
     const result = await scanUrl(details.url);
+
+    await pushAlert(result);
+    await chrome.storage.local.set({ lastScan: result });
 
     if (result.risk_level === 'high' || result.risk_level === 'critical') {
       threatCount++;
@@ -125,7 +144,6 @@ chrome.webNavigation.onCompleted.addListener(async (details) => {
       chrome.tabs.sendMessage(details.tabId, { type: 'SHOW_WARNING', data: payload }).catch(() => {});
       chrome.tabs.sendMessage(details.tabId, { type: 'THREAT_DETECTED', data: result }).catch(() => {});
     }
-    await chrome.storage.local.set({ lastScan: result });
   } catch (e) {
     console.warn('Scan failed:', e.message);
   }
@@ -143,14 +161,19 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === 'LOGOUT') {
     apiFetch('/auth/logout', { method: 'POST' })
       .catch(() => {})
-      .finally(() => clearTokens())
+      .finally(async () => {
+        await clearTokens();
+        await chrome.storage.local.remove(['alerts', 'lastScan']);
+        threatCount = 0;
+        updateBadge();
+      })
       .then(() => sendResponse({ ok: true }));
     return true;
   }
 
   if (msg.type === 'SCAN') {
     scanUrl(msg.url)
-      .then((data) => sendResponse({ ok: true, data }))
+      .then(async (data) => { await pushAlert(data); sendResponse({ ok: true, data }); })
       .catch((e) => sendResponse({ ok: false, error: e.message }));
     return true;
   }

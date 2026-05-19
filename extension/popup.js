@@ -47,9 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
       v.label +
       '<div class="detail">Confidence: ' + Math.round(data.confidence * 100) + '% \u00B7 ' + data.threat_category + '</div>';
     scanResult.classList.remove('hidden');
-
-    // Add to alerts tab
-    addAlert(data);
+    // Alert will appear via storage.onChanged \u2014 no need to call addAlert here
   }
 
   function addAlert(data) {
@@ -110,14 +108,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Check login status
+  // Check login status and load full alert history
   chrome.runtime.sendMessage({ type: 'GET_STATUS' }, (res) => {
     if (res && res.loggedIn) {
       showLoggedIn(res.user, res.lastScan);
+      chrome.storage.local.get('alerts', ({ alerts }) => {
+        if (Array.isArray(alerts)) {
+          alerts.forEach(a => addAlert(a));
+        }
+      });
     } else {
       loginSection.classList.remove('hidden');
       mainSection.style.display = 'none';
       statusDot.style.background = 'var(--text-muted)';
+    }
+  });
+
+  // Show new alerts in real-time while popup is open
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes.alerts) {
+      const newList = changes.alerts.newValue;
+      const oldList = changes.alerts.oldValue || [];
+      if (Array.isArray(newList) && newList.length > oldList.length) {
+        // Only the newly prepended item (index 0) is new
+        addAlert(newList[0]);
+      }
     }
   });
 

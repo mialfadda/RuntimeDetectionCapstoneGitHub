@@ -31,10 +31,13 @@ def create_app():
     app.config['MODEL_UPLOAD_ALLOWED_EXT'] = ('.pkl', '.pt', '.joblib', '.h5', '.onnx')
 
     frontend_url = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+    dashboard_url = os.getenv('DASHBOARD_URL', 'http://localhost:5174')
     CORS(app,
          origins=[
              frontend_url,
+             dashboard_url,
              "http://localhost:5173",
+             "http://localhost:5174",
              "http://localhost:3000",
              "chrome-extension://*",
          ],
