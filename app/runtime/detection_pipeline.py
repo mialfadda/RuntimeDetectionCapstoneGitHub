@@ -50,22 +50,27 @@ def build_feature_dict(
     if runtime_evidence is not None:
         runtime_features = extract_runtime_features(runtime_evidence)
 
+    # The trained Decision Tree splits these punctuation features at
+    # non-binary thresholds (e.g. `=` at 0.5/1.0/1.5/.../7.5, `%` up to
+    # 20.5), so they were trained on COUNTS, not presence flags. main's
+    # detection_pipeline.py mapped them to `1 if X in url else 0` which
+    # silently produced wrong predictions; we use url.count(...) here.
     feature_dict = {
         # ── 42 features the model was trained on ──
         "url_len": url_features["url_length"],
-        "@": url_features["has_at_symbol"],
-        "?": 1 if "?" in url else 0,
-        "-": url_features["num_hyphens"],
-        "=": 1 if "=" in url else 0,
-        ".": url_features["num_dots"],
-        "#": 1 if "#" in url else 0,
-        "%": 1 if "%" in url else 0,
-        "+": 1 if "+" in url else 0,
-        "$": 1 if "$" in url else 0,
-        "!": 1 if "!" in url else 0,
-        "*": 1 if "*" in url else 0,
-        ",": 1 if "," in url else 0,
-        "//": url_features["has_double_slash_redirect"],
+        "@": url.count("@"),
+        "?": url.count("?"),
+        "-": url_features["num_hyphens"],          # already a count
+        "=": url.count("="),
+        ".": url_features["num_dots"],             # already a count
+        "#": url.count("#"),
+        "%": url.count("%"),
+        "+": url.count("+"),
+        "$": url.count("$"),
+        "!": url.count("!"),
+        "*": url.count("*"),
+        ",": url.count(","),
+        "//": url.count("//"),
         "digits": url_features["num_digits_in_url"],
         "letters": sum(c.isalpha() for c in url),
         "Shortining_Service": url_features["is_url_shortener"],
