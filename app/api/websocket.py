@@ -1,6 +1,10 @@
 from flask_socketio import SocketIO
 
-socketio = SocketIO()
+# `async_mode='threading'` avoids engineio's eventlet auto-detect, which
+# fails on Python 3.12+ because eventlet still references
+# `ssl.wrap_socket` (removed in 3.12). The production server already
+# moved off eventlet (sync gunicorn) so this also matches deploy reality.
+socketio = SocketIO(async_mode='threading')
 
 
 def send_threat_alert(user_id, url, label, confidence):
