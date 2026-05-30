@@ -2,16 +2,18 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 
-function mapVerdict(risk_level) {
-  if (risk_level === 'safe' || risk_level === 'low') return 'Safe';
-  if (risk_level === 'medium') return 'Suspicious';
-  return 'Malicious';
-}
+const CATEGORY_STYLE = {
+  benign:     { label: 'Benign',     color: 'bg-[#22c55e]' },
+  defacement: { label: 'Defacement', color: 'bg-[#f59e0b]' },
+  phishing:   { label: 'Phishing',   color: 'bg-[#ef4444]' },
+  malware:    { label: 'Malware',    color: 'bg-[#7c3aed]' },
+};
 
-function verdictColor(v) {
-  if (v === 'Safe') return 'bg-[#22c55e]';
-  if (v === 'Suspicious') return 'bg-[#f59e0b]';
-  return 'bg-[#ef4444]';
+function categoryBadge(threat_category) {
+  return CATEGORY_STYLE[(threat_category || '').toLowerCase()] || {
+    label: '—',
+    color: 'bg-gray-400',
+  };
 }
 
 export default function Dashboard() {
@@ -70,22 +72,24 @@ export default function Dashboard() {
             <tr>
               <th className="py-3 px-5 font-semibold">URL</th>
               <th className="py-3 px-5 font-semibold">Date</th>
-              <th className="py-3 px-5 font-semibold">Verdict</th>
+              <th className="py-3 px-5 font-semibold">Category</th>
+              <th className="py-3 px-5 font-semibold">Risk</th>
               <th className="py-3 px-5 font-semibold">Confidence %</th>
             </tr>
           </thead>
           <tbody>
             {scans.length === 0 ? (
-              <tr><td colSpan={4} className="py-8 text-center text-gray-400">No scans yet</td></tr>
+              <tr><td colSpan={5} className="py-8 text-center text-gray-400">No scans yet</td></tr>
             ) : scans.map((s) => {
               const rl = (s.risk_level || '').toLowerCase();
-              const vd = {
+              const risk = {
                 safe:     { label: 'Safe',       color: 'bg-[#22c55e]' },
-                low:      { label: 'Safe',       color: 'bg-[#22c55e]' },
-                medium:   { label: 'Suspicious', color: 'bg-[#f59e0b]' },
-                high:     { label: 'Malicious',  color: 'bg-[#ef4444]' },
-                critical: { label: 'Malicious',  color: 'bg-[#ef4444]' },
+                low:      { label: 'Low',        color: 'bg-[#22c55e]' },
+                medium:   { label: 'Medium',     color: 'bg-[#f59e0b]' },
+                high:     { label: 'High',       color: 'bg-[#ef4444]' },
+                critical: { label: 'Critical',   color: 'bg-[#7c3aed]' },
               }[rl] || { label: s.status || '\u2014', color: 'bg-gray-400' };
+              const cat = categoryBadge(s.threat_category);
               return (
                 <tr key={s.scan_id} className="border-b border-gray-100 hover:bg-gray-50">
                   <td className="py-3 px-5 font-mono text-xs max-w-xs truncate text-gray-800">{s.url}</td>
@@ -93,8 +97,13 @@ export default function Dashboard() {
                     {s.created_at ? new Date(s.created_at).toLocaleDateString() : '-'}
                   </td>
                   <td className="py-3 px-5">
-                    <span className={`px-3 py-1 rounded-full text-white text-xs font-semibold ${vd.color}`}>
-                      {vd.label}
+                    <span className={`px-3 py-1 rounded-full text-white text-xs font-semibold ${cat.color}`}>
+                      {cat.label}
+                    </span>
+                  </td>
+                  <td className="py-3 px-5">
+                    <span className={`px-3 py-1 rounded-full text-white text-xs font-semibold ${risk.color}`}>
+                      {risk.label}
                     </span>
                   </td>
                   <td className="py-3 px-5 text-gray-700 font-medium text-xs">
