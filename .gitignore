@@ -31,6 +31,10 @@ logs/
 # Reports (don't commit these)
 reports/
 
+# Training dataset (large CSVs from Kaggle — not redistributable here;
+# every contributor places their copy at data/dataset.csv).
+data/
+
 # Models (large binaries — trained ensemble artifacts tracked via Git LFS,
 # everything else stays out so experimental dumps don't bloat the repo)
 models/*.pkl
