@@ -25,15 +25,23 @@ class SHAPExplainer:
         predicted_class = int(self.model.predict(vector)[0])
         predicted_label = LABEL_MAP[predicted_class]
 
-        # shap_values shape depends on classifier output — handle both
-        # multi-class (list per class) and 3-D array layouts.
-        sv = np.asarray(shap_values)
-        if sv.ndim == 3:
-            class_shap = sv[predicted_class][0]
-        elif isinstance(shap_values, list):
+        # SHAP's TreeExplainer returns different shapes across versions:
+        #   shap<0.40 multi-class: list of length n_classes, each (n_samples, n_features)
+        #   shap>=0.40             : single ndarray (n_samples, n_features, n_classes)
+        #   binary classifier      : single ndarray (n_samples, n_features)
+        if isinstance(shap_values, list):
             class_shap = np.asarray(shap_values[predicted_class][0])
         else:
-            class_shap = sv[0]
+            sv = np.asarray(shap_values)
+            if sv.ndim == 3:
+                # (n_samples, n_features, n_classes) — newer SHAP
+                if sv.shape[-1] == len(LABEL_MAP):
+                    class_shap = sv[0, :, predicted_class]
+                else:
+                    # (n_classes, n_samples, n_features) — older layout
+                    class_shap = sv[predicted_class][0]
+            else:
+                class_shap = sv[0]
 
         feature_impacts = [
             {"feature": name, "shap_value": round(float(val), 6)}
