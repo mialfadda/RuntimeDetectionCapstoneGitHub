@@ -26,10 +26,13 @@ from app.interfaces.contracts import ScanRequest  # noqa: E402
 from app.interfaces.pipeline import run_pipeline  # noqa: E402
 
 
+# Exact URL strings from data/dataset.csv (the integration spec quoted
+# shortened forms; the runtime sees the full URL the dataset's pipeline
+# computed features from).
 REFERENCE = [
-    ("http://824555.com/app/member/SportOption.php", "malware",  0.97),
-    ("http://mp3raid.com",                            "benign",   0.82),
-    ("http://br-icloud.com.br",                       "benign",   0.58),
+    ("http://824555.com/app/member/SportOption.php?uid=guest&langx=gb", "malware",  0.97),
+    ("mp3raid.com/music/krizz_kaliko.html",                              "benign",   0.82),
+    ("br-icloud.com.br",                                                 "benign",   0.58),
 ]
 
 

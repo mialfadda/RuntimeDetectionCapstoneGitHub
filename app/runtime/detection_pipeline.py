@@ -40,69 +40,24 @@ def build_feature_dict(
 ) -> dict:
     """Build the canonical feature_dict consumed by the ensemble.
 
-    Keys match the names in `feature_names.pkl` (everything else is ignored
-    by the wrappers' alignment step, but kept here for retraining).
+    Delegates the 42 model features to `app.runtime.features` (which is
+    reverse-engineered to reproduce the CSV's pre-computed columns; see
+    scripts/validate_features.py for per-column agreement). HTML and
+    runtime evidence are passed through as `html_*` / `rt_*` keys for
+    future retraining — the model wrappers' alignment step drops them
+    today because they aren't in feature_names.pkl.
     """
-    url_features = extract_url_features(url)
-    html_features = extract_html_features(html or "")
+    from app.runtime.features import extract_features_from_url
 
+    html_features = extract_html_features(html or "")
     runtime_features: dict = {}
     if runtime_evidence is not None:
         runtime_features = extract_runtime_features(runtime_evidence)
 
-    # The trained Decision Tree splits these punctuation features at
-    # non-binary thresholds (e.g. `=` at 0.5/1.0/1.5/.../7.5, `%` up to
-    # 20.5), so they were trained on COUNTS, not presence flags. main's
-    # detection_pipeline.py mapped them to `1 if X in url else 0` which
-    # silently produced wrong predictions; we use url.count(...) here.
-    feature_dict = {
-        # ── 42 features the model was trained on ──
-        "url_len": url_features["url_length"],
-        "@": url.count("@"),
-        "?": url.count("?"),
-        "-": url_features["num_hyphens"],          # already a count
-        "=": url.count("="),
-        ".": url_features["num_dots"],             # already a count
-        "#": url.count("#"),
-        "%": url.count("%"),
-        "+": url.count("+"),
-        "$": url.count("$"),
-        "!": url.count("!"),
-        "*": url.count("*"),
-        ",": url.count(","),
-        "//": url.count("//"),
-        "digits": url_features["num_digits_in_url"],
-        "letters": sum(c.isalpha() for c in url),
-        "Shortining_Service": url_features["is_url_shortener"],
-        "having_ip_address": url_features["has_ip_address"],
-        "phish_urgency_words": url_features["has_suspicious_keywords"],
-        "phish_security_words": url_features["has_suspicious_keywords"],
-        "phish_brand_mentions": 0,
-        "phish_brand_hijack": 0,
-        "phish_multiple_subdomains": int(url_features["subdomain_count"] > 2),
-        "phish_long_path": int(url_features["path_depth"] > 4),
-        "phish_many_params": int("?" in url and url.count("=") > 2),
-        "phish_suspicious_tld": 0,
-        "phish_adv_exact_brand_match": 0,
-        "phish_adv_brand_in_subdomain": 0,
-        "phish_adv_brand_in_path": 0,
-        "phish_adv_hyphen_count": url_features["num_hyphens"],
-        "phish_adv_number_count": url_features["num_digits_in_url"],
-        "phish_adv_suspicious_tld": 0,
-        "phish_adv_long_domain": int(url_features["domain_length"] > 20),
-        "phish_adv_many_subdomains": int(url_features["subdomain_count"] > 2),
-        "phish_adv_encoded_chars": int("%" in url),
-        "phish_adv_path_keywords": url_features["has_suspicious_keywords"],
-        "phish_adv_has_redirect": html_features.get("has_redirect_meta", 0),
-        "phish_adv_many_params": int(url.count("=") > 2),
-        "path_has_hacked_terms": 0,
-        "suspicious_extension": int(url.endswith((".exe", ".zip", ".php", ".js", ".bat"))),
-        "path_underscore_count": url.count("_"),
-        "is_gov_edu": int(url.endswith((".gov", ".edu"))),
-        # ── Extra HTML / runtime fields (ignored by current model, kept for retraining) ──
-        **{f"html_{k}": v for k, v in html_features.items()},
-        **{f"rt_{k}": v for k, v in runtime_features.items()},
-    }
+    feature_dict = extract_features_from_url(url)
+    # Carry HTML/runtime metadata for retraining; ignored by current model.
+    feature_dict.update({f"html_{k}": v for k, v in html_features.items()})
+    feature_dict.update({f"rt_{k}": v for k, v in runtime_features.items()})
     return feature_dict
 
 
