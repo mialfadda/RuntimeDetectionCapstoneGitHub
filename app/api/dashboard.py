@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timedelta
 
 from flask import Blueprint, current_app, jsonify, request, send_file
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 from sqlalchemy import func
 
 from app import limiter
@@ -33,17 +33,17 @@ def _parse_date_range():
 @limiter.limit("120/minute")
 def metrics():
     start, end = _parse_date_range()
-    total = (
-        db.session.query(func.count(URLSubmission.submissionID))
-        .filter(URLSubmission.creationDate.between(start, end))
-        .scalar()
+    caller_id = int(get_jwt_identity())
+    is_admin = get_jwt().get("role") == "admin"
+
+    base = db.session.query(func.count(URLSubmission.submissionID)).filter(
+        URLSubmission.creationDate.between(start, end)
     )
-    completed = (
-        db.session.query(func.count(URLSubmission.submissionID))
-        .filter(URLSubmission.creationDate.between(start, end))
-        .filter(URLSubmission.status == "complete")
-        .scalar()
-    )
+    if not is_admin:
+        base = base.filter(URLSubmission.userID == caller_id)
+
+    total = base.scalar()
+    completed = base.filter(URLSubmission.status == "complete").scalar()
     return jsonify({
         "start": start.isoformat(),
         "end": end.isoformat(),

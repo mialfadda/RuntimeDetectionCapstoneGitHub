@@ -7,13 +7,13 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/auth': 'http://127.0.0.1:5000',
-      '/scan': 'http://127.0.0.1:5000',
-      '/detections': 'http://127.0.0.1:5000',
-      '/explanations': 'http://127.0.0.1:5000',
-      '/dashboard': 'http://127.0.0.1:5000',
-      '/admin': 'http://127.0.0.1:5000',
-      '/health': 'http://127.0.0.1:5000',
+      '/auth':         { target: 'http://127.0.0.1:5000', changeOrigin: true },
+      '/scan':         { target: 'http://127.0.0.1:5000', changeOrigin: true },
+      '/detections':   { target: 'http://127.0.0.1:5000', changeOrigin: true },
+      '/explanations': { target: 'http://127.0.0.1:5000', changeOrigin: true },
+      '/dashboard':    { target: 'http://127.0.0.1:5000', changeOrigin: true },
+      '/admin':        { target: 'http://127.0.0.1:5000', changeOrigin: true },
+      '/health':       { target: 'http://127.0.0.1:5000', changeOrigin: true },
     },
   },
 })

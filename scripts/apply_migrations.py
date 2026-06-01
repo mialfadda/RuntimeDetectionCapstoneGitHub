@@ -1,14 +1,11 @@
-"""Run Alembic migrations against the configured DATABASE_URL.
-
-Called from Railway's start command (or any prod boot) before the web
-worker starts so the schema is always at HEAD. Safer than relying on
-the `flask` CLI finding FLASK_APP at runtime.
-"""
+"""Run Alembic migrations against the configured DATABASE_URL."""
 import os
 import sys
 
-from flask_migrate import upgrade
+# Fix Python path so 'app' module is found
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from flask_migrate import upgrade
 from app import create_app
 
 
@@ -24,9 +21,6 @@ if __name__ == '__main__':
     try:
         main()
     except Exception as e:
-        # Don't crash the deployment if migrations fail (e.g. on first run
-        # before tables exist). Fall back to create_all for the brand-new
-        # case so the app still boots, then exit non-zero so Railway logs it.
         print(f"[migrate] upgrade failed: {e}", flush=True)
         from app import create_app
         from app.database.models import db
