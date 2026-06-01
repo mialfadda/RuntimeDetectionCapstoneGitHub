@@ -44,6 +44,11 @@ export default function Scan() {
   return (
     <div className="min-h-[calc(100vh-64px)] flex flex-col items-center justify-center bg-white px-6">
       <div className="w-full max-w-2xl">
+        {/* Heading */}
+        <h1 className="text-4xl md:text-5xl font-bold text-[#1A3A6B] leading-tight tracking-tight text-center mb-10">
+          DETECT MALICIOUS<br />WEBSITES INSTANTLY
+        </h1>
+
         {/* Scan input */}
         <form onSubmit={handleScan} className="flex items-center gap-0">
           <input
