@@ -117,7 +117,7 @@ export default function Reports() {
                 <td className="py-3 px-5 uppercase text-xs text-gray-600">{r.format}</td>
                 <td className="py-3 px-5">
                   <span className={`px-3 py-1 rounded-full text-white text-xs font-semibold ${
-                    r.status === 'completed' ? 'bg-[#22c55e]' : 'bg-[#f59e0b]'
+                    r.status === 'complete' ? 'bg-[#22c55e]' : 'bg-[#f59e0b]'
                   }`}>{r.status}</span>
                 </td>
                 <td className="py-3 px-5 text-gray-500 text-xs">

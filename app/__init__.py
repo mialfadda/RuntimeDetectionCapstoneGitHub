@@ -25,7 +25,8 @@ def create_app():
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', app.config['JWT_SECRET_KEY'])
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = 3600
     app.config['REPORTS_DIR'] = 'reports'
-    app.config['MODEL_DIR'] = 'models'
+    app.config['MODEL_DIR'] = os.getenv('MODEL_DIR', 'models')
+    app.config['OPENAI_API_KEY'] = os.getenv('OPENAI_API_KEY')
     app.config['MODEL_UPLOAD_SECRET'] = os.getenv('MODEL_UPLOAD_SECRET', 'dev-model-upload-secret')
     app.config['MODEL_UPLOAD_MAX_MB'] = 200
     app.config['MODEL_UPLOAD_ALLOWED_EXT'] = ('.pkl', '.pt', '.joblib', '.h5', '.onnx')

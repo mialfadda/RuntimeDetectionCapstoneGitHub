@@ -31,10 +31,22 @@ logs/
 # Reports (don't commit these)
 reports/
 
-# Models (too large for Git)
+# Training dataset (large CSVs from Kaggle — not redistributable here;
+# every contributor places their copy at data/dataset.csv).
+data/
+
+# Models (large binaries — trained ensemble artifacts tracked via Git LFS,
+# everything else stays out so experimental dumps don't bloat the repo)
 models/*.pkl
 models/*.h5
 models/*.pt
+models/*.keras
+models/*.joblib
+!models/decision_tree.pkl
+!models/xgboost.pkl
+!models/lstm_model.keras
+!models/scaler.pkl
+!models/feature_names.pkl
 
 # IDE
 .vscode/

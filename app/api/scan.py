@@ -6,6 +6,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from app import limiter
 from app.database.models import Explanation, Prediction, URLSubmission, db
+from app.database.persistence import persist_prediction
 from app.interfaces.contracts import RuntimeEvidence, ScanRequest, to_json
 from app.interfaces.mocks import run_pipeline
 from app.utils.validators import ValidationError, reject_injection, validate_url
@@ -41,22 +42,29 @@ def analyze():
     submission.risk_level = result.risk_level.value
     submission.confidence = result.confidence
 
+    prediction_id = persist_prediction(submission, result)
+
+    contributions_text = ", ".join(
+        f"{mc.model_name}={mc.score:.2f}" for mc in (result.model_contributions or [])
+    ) or "no model contributions recorded"
+
     exp = Explanation(
         submission_id=submission.submissionID,
+        predictionID=prediction_id,
         rationale=(
             f"URL '{url}' was analyzed by the ensemble model. "
             f"Risk level: {result.risk_level.value}. "
             f"Threat category: {result.threat_category.value}. "
             f"Confidence: {round(result.confidence * 100, 1)}%. "
-            f"Top contributing signals: URL structure, "
-            f"domain reputation, and script behavior patterns."
+            f"Per-model scores: {contributions_text}."
         ),
         method='SHAP',
     )
     db.session.add(exp)
 
     current_app.logger.info(
-        "scan %s -> %s (%.3f)", url, result.risk_level.value, result.confidence
+        "scan %s -> %s/%s (%.3f)",
+        url, result.threat_category.value, result.risk_level.value, result.confidence,
     )
     db.session.commit()
     return jsonify(to_json(result)), 200

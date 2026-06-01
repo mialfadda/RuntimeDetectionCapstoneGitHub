@@ -409,9 +409,10 @@ class Prediction(db.Model):
 
     @validates('label')
     def validate_label(self, key, label):
-        # only these two labels are valid for your system
-        assert label in ['phishing', 'legitimate'], \
-            'Label must be phishing or legitimate'
+        # 4-class ensemble labels + legacy binary labels (back-compat for
+        # rows written by the older RandomForest pipeline).
+        valid = ['benign', 'defacement', 'phishing', 'malware', 'legitimate']
+        assert label in valid, f'Label must be one of {valid}'
         return label
 
     # Helper methods

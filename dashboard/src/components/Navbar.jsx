@@ -26,9 +26,6 @@ export default function Navbar() {
         <div className="flex items-center gap-8">
           <Link to="/" className="text-gray-700 hover:text-[#2D5FA6] font-medium text-sm">Home</Link>
           <Link to="/scan" className="text-gray-700 hover:text-[#2D5FA6] font-medium text-sm">Features</Link>
-          <span className="text-gray-700 font-medium text-sm cursor-default">Help</span>
-          <span className="text-gray-700 font-medium text-sm cursor-default">About</span>
-          <span className="text-gray-700 font-medium text-sm cursor-default">Feedback</span>
 
           {/* More dropdown */}
           <div className="relative" ref={ref}>

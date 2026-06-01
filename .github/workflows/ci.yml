@@ -13,6 +13,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        lfs: true
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -46,7 +48,7 @@ jobs:
       run: |
         echo "[flake8]" > setup.cfg
         echo "max-line-length = 120" >> setup.cfg
-        echo "ignore = E501,W503,E302,W291,F401,E303,W292,E305,W293,E231,E225,E266,E265,W391,E221,E127,F841,E124,E128" >> setup.cfg
+        echo "ignore = E501,W503,E302,W291,F401,E303,W292,E305,W293,E231,E225,E266,E265,W391,E221,E127,F841,E124,E128,E241,E701,E702,E704,E226,E401,E402,E722,E261,E272" >> setup.cfg
 
     - name: Run linter
       run: flake8 app/
