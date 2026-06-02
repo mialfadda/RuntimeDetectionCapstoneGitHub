@@ -252,7 +252,7 @@ def run_pipeline(req: ScanRequest) -> ScanResult:
         return _hash_fallback(req.url, (time.perf_counter() - started) * 1000)
 
 
-def generate_explanation(scan_id: int, url: str) -> ExplanationResult:
+def generate_explanation(scan_id: int, url: str, confidence: float = 0.0) -> ExplanationResult:
     shap_exp, lime_exp, llm_exp = _get_explainers()
 
     # Build a feature_dict once for the explainers to share.
@@ -296,15 +296,16 @@ def generate_explanation(scan_id: int, url: str) -> ExplanationResult:
             for f in lime_result.get("top_features", [])
         ]
 
-    # LLM summary on top of SHAP (template fallback inside the explainer).
+    # LLM summary — runs with whatever context is available (SHAP, LIME, or neither).
     summary_text = ""
-    if llm_exp is not None and shap_result is not None:
+    if llm_exp is not None:
         try:
+            best_result = shap_result or lime_result or {}
             scan_stub = {
-                "predicted_label": shap_result.get("predicted_label", "unknown"),
-                "confidence": 0.0,  # not known here, kept for API shape
+                "predicted_label": best_result.get("predicted_label", "unknown"),
+                "confidence": confidence,
             }
-            llm_out = llm_exp.explain(url=url, scan_result=scan_stub, shap_result=shap_result)
+            llm_out = llm_exp.explain(url=url, scan_result=scan_stub, shap_result=best_result)
             summary_text = llm_out.get("explanation") or ""
         except Exception as e:
             _log.warning("LLM explanation failed: %s", e)

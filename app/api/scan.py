@@ -8,7 +8,7 @@ from app import limiter
 from app.database.models import Explanation, Prediction, URLSubmission, db
 from app.database.persistence import persist_prediction
 from app.interfaces.contracts import RuntimeEvidence, ScanRequest, to_json
-from app.interfaces.mocks import run_pipeline
+from app.interfaces.mocks import generate_explanation, run_pipeline
 from app.utils.validators import ValidationError, reject_injection, validate_url
 
 scan_bp = Blueprint("scan", __name__)
@@ -44,21 +44,25 @@ def analyze():
 
     prediction_id = persist_prediction(submission, result)
 
-    contributions_text = ", ".join(
-        f"{mc.model_name}={mc.score:.2f}" for mc in (result.model_contributions or [])
-    ) or "no model contributions recorded"
-
-    exp = Explanation(
-        submission_id=submission.submissionID,
-        predictionID=prediction_id,
-        rationale=(
+    explanation_result = generate_explanation(submission.submissionID, url, confidence=result.confidence)
+    rationale = explanation_result.summary_text or ""
+    if not rationale:
+        contributions_text = ", ".join(
+            f"{mc.model_name}={mc.score:.2f}" for mc in (result.model_contributions or [])
+        ) or "no model contributions recorded"
+        rationale = (
             f"URL '{url}' was analyzed by the ensemble model. "
             f"Risk level: {result.risk_level.value}. "
             f"Threat category: {result.threat_category.value}. "
             f"Confidence: {round(result.confidence * 100, 1)}%. "
             f"Per-model scores: {contributions_text}."
-        ),
-        method='SHAP',
+        )
+
+    exp = Explanation(
+        submission_id=submission.submissionID,
+        predictionID=prediction_id,
+        rationale=rationale,
+        method='LIME' if explanation_result.method and explanation_result.method.value == 'lime' else 'SHAP',
     )
     db.session.add(exp)
 
