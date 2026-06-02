@@ -66,7 +66,7 @@ The system has two components that run together:
 
 ## Prerequisites
 
-- Python 3.10+
+- Python 3.11
 - Node.js 18+
 - npm 9+
 
