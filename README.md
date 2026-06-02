@@ -35,6 +35,7 @@ pytest tests/
 ```
 
 Expected: **17/17 passing**. These tests load the real model binaries (no dataset needed). If all pass, LFS worked and the ensemble is intact. You do **not** need the training CSV to run scans — it is gitignored and only needed for retraining.
+if some tests are skipped, try confirming again after .venv is activated
 
 ### Run locally (no Railway needed)
 
